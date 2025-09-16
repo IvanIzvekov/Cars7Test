@@ -17,14 +17,15 @@ class StatisticsRepository:
     async def get(self, request: StatisticsItemRead | List[int]) -> List[OperatorStatistics]:
         query = select(OperatorStatistics)
 
-        if isinstance(request, list):
+        if isinstance(request, list) and all(isinstance(i, int) for i in request) and request:
             query = query.where(OperatorStatistics.id.in_(request))
-            return await self.session.execute(query).scalars().all()
+            result = await self.session.execute(query)
+            return result.scalars().all()
 
-        if request.shift_id:
-            query = query.where(OperatorStatistics.shift_id.in_(request.shift_id))
-        elif request.operator_id:
-            query = query.where(OperatorStatistics.operator_id.in_(request.operator_id))
+        if request.shift_ids:
+            query = query.where(OperatorStatistics.shift_id.in_(request.shift_ids))
+        elif request.operator_ids:
+            query = query.where(OperatorStatistics.operator_id.in_(request.operator_ids))
 
         if request.start_date:
             query = query.where(OperatorStatistics.stat_date >= request.start_date)
@@ -35,7 +36,8 @@ class StatisticsRepository:
         if request.parameter_ids:
             query = query.where(OperatorStatistics.parameter_id.in_(request.parameter_ids))
 
-        return await self.session.execute(query).scalars().all()
+        result = await self.session.execute(query)
+        return result.scalars().all()
 
     async def create_statistics(self, request: StatisticsItemCreate) -> int:
         stat = OperatorStatistics(

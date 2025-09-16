@@ -11,3 +11,5 @@ class SalaryCalculation(Base):
     start_at = Column(TIMESTAMP, nullable=False)
     end_at = Column(TIMESTAMP, nullable=False)
     operator_id = Column(Integer, ForeignKey("employees.id"), nullable=False)
+    salary_amount = Column(Numeric, nullable=True)
+    calc_date = Column(TIMESTAMP, nullable=True)

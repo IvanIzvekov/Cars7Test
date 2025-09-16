@@ -2,6 +2,8 @@ from app.schemas.employees import EmployeeItemCreate
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.employee import Employee
 import logging
+from typing import List
+from sqlalchemy import select
 
 logger = logging.getLogger(__name__)
 
@@ -9,6 +11,12 @@ logger = logging.getLogger(__name__)
 class EmployeeRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
+
+    async def get_all_operators(self) -> List[Employee]:
+        """Получить всех сотрудников"""
+        query = select(Employee)
+        result = await self.session.execute(query)
+        return result.scalars().all()
 
     async def get_operator(self, operator_id: int) -> Employee:
         """Получить сотрудника по ID"""

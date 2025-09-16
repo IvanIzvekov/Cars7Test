@@ -5,11 +5,11 @@ from typing import List
 
 
 class StatisticsItemRead(BaseModel):
-    operator_id: List[int]
-    shift_id: Optional[List[int]]
-    start_date: Optional[datetime]
-    end_date: Optional[datetime]
-    parameter_ids: Optional[List[int]]
+    operator_ids: List[int] | None = None
+    shift_ids: Optional[List[int]] | None = None
+    start_date: Optional[datetime] | None = None
+    end_date: Optional[datetime] | None = None
+    parameter_ids: Optional[List[int]] | None = None
 
 
 

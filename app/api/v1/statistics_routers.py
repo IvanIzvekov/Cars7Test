@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_session
 
@@ -7,7 +7,6 @@ from app.services.statistics import StatisticsService
 from app.schemas.statistics import StatisticsItemRead, StatisticsItemCreate
 
 import logging
-from datetime import datetime
 from typing import List
 
 logger = logging.getLogger(__name__)
@@ -15,10 +14,10 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/statistics", tags=["statistics"])
 
 
-@router.post("/")
+@router.post("/get")
 async def get_statistics_router(
         request: StatisticsItemRead,
-        ids: List[int] = None,
+        ids: List[int] | None = Query(None),
         session: AsyncSession = Depends(get_session)):
     service = StatisticsService(session)
     try:
