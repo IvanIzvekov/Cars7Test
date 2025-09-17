@@ -58,12 +58,14 @@ async def init_models(retries: int = 5, delay: float = 2.0):
                 async with engine.begin() as conn:
                     await conn.run_sync(Base.metadata.create_all)
                 logger.info("Таблицы успешно созданы")
+                print("Tables created successfully")
                 return
         except (SQLAlchemyError, DBAPIError) as e:
             attempt += 1
             logger.warning(f"Попытка {attempt}/{retries} создания таблиц не удалась: {e}")
+            print(f"Tables creation attempt {attempt}/{retries} failed: {e}")
             await asyncio.sleep(delay)
-        raise RuntimeError(f"Не удалось создать таблицы после {retries} попыток")
+    raise RuntimeError(f"Не удалось создать таблицы после {retries} попыток")
 
 async def shutdown_engine():
     try:

@@ -16,6 +16,7 @@ class SalaryService:
         self.stat_repo = StatisticsRepository(session)
         self.employee_repo = EmployeeRepository(session)
 
+
     async def calculate_prev_month_salary(self, operator_ids: List[int] = None):
         today = datetime.now()
         prev_month = today.month - 1 or 12
@@ -27,7 +28,6 @@ class SalaryService:
     async def calculate_monthly_salary(
         self, start_at: datetime, end_at: datetime, operator_ids: List[int] = None
     ):
-        # Получаем статистику и коэффициенты
         stats_model = StatisticsItemRead(
             start_date=start_at, end_date=end_at, operator_ids=operator_ids
         )
@@ -35,23 +35,19 @@ class SalaryService:
         coeffs = await self.repo.get_coefficients()
         coeff_map = {c.id: c for c in coeffs}
 
-        # Получаем сотрудников
         if operator_ids:
             employees = [await self.employee_repo.get_operator(op_id) for op_id in operator_ids]
         else:
             employees = await self.employee_repo.get_all_operators()
         salary_map = {e.id: Decimal(e.salary) for e in employees}
 
-        # Агрегируем статистику по (оператор, параметр)
         grouped = defaultdict(list)
         for s in stats:
             grouped[(s.operator_id, s.parameter_id)].append(Decimal(s.value))
 
-        # Удаляем старые записи
         if stats:
             await self.repo.delete_salary_calculation(start_at, end_at, operator_ids)
 
-        # Рассчитываем зарплату
         for operator in employees:
             pos_sum = Decimal(0)
             neg_sum = Decimal(0)
@@ -96,11 +92,9 @@ class SalaryService:
                     end_at=end_at,
                 )
 
-            # Нормализуем по весу
             pos_total = pos_sum / pos_weight if pos_weight else Decimal(1)
             neg_total = neg_sum / neg_weight if neg_weight else Decimal(1)
 
-            # Итоговый коэффициент
             total_coef = pos_total - (Decimal(1) - neg_total)
             total_coef = max(total_coef, Decimal(0))
 
